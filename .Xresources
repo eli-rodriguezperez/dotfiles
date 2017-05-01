@@ -1,0 +1,58 @@
+URxvt.font: xft:monaco:size=10
+URxvt.scrollBar: false
+
+! Transparency
+urxvt*depth: 32
+urxvt*background: rgba:0000/0000/0200/c800
+
+! special
+*.foreground:   #f8f8f2
+*.background:   #272822
+*.cursorColor:  #f8f8f2
+
+! black
+*.color0:       #272822
+*.color8:       #6b6a69
+
+! red
+*.color1:       #f92672
+*.color9:       #f92672
+
+! green
+*.color2:       #a6e22e
+*.color10:      #a6e22e
+
+! yellow
+*.color3:       #f4bf75
+*.color11:      #f4bf75
+
+! blue
+*.color4:       #66d9ef
+*.color12:      #66d9ef
+
+! magenta
+*.color5:       #ae81ff
+*.color13:      #ae81ff
+
+! cyan
+*.color6:       #a1efe4
+*.color14:      #a1efe4
+
+! white
+*.color7:       #f8f8f2
+*.color15:      #f9f8f5
+
+! ------------------------------------------------------------------------------
+! ROFI Color theme
+! Copyright: Étienne Deparis
+! ------------------------------------------------------------------------------
+! "Color scheme for normal row" Set from: File
+rofi.color-normal:                   argb:00272822, #f8f8f2, argb:00272822, #141411, #f8f8f2
+! "Color scheme for urgent row" Set from: File
+rofi.color-urgent:                   argb:00272822, #f92672, argb:00272822, #f92672, #f8f8f2
+! "Color scheme for active row" Set from: File
+rofi.color-active:                   argb:00272822, #a6e22a, argb:00272822, #141411, #a6e22a
+! "Color scheme window" Set from: File
+rofi.color-window:                   argb:ee272822, #002b36, #e6db74
+! "Separator style (none, dash, solid)" Set from: File
+rofi.separator-style:                solid
