@@ -1,21 +1,31 @@
 set nocompatible
-set number
-set relativenumber
+filetype indent plugin on
 syntax on
-filetype off
-filetype plugin indent on
-filetype plugin indent on
-set ruler
-set encoding=utf-8
-set laststatus=2
-set t_Co=256
-set visualbell
-set tabstop=4
-set shiftwidth=4
-set smarttab
+set hidden
+set wildmenu
 set showcmd
-set incsearch
+set hlsearch
+set nomodeline
 set ignorecase
 set smartcase
+set encoding=utf-8
+set backspace=indent,eol,start
 set autoindent
+set nostartofline
+set ruler
+set laststatus=2
+set confirm
+set visualbell
 set mouse=a
+set cmdheight=2
+set number
+set notimeout ttimeout ttimeoutlen=200
+set shiftwidth=4
+set softtabstop=4
+set expandtab
+set t_Co=256
+colorscheme monokai
+call plug#begin('~/.vim/plugged')
+Plug 'scrooloose/nerdtree'
+Plug 'bling/vim-airline'
+call plug#end()
