@@ -3,7 +3,7 @@ filetype off
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin('~/.vim/plugged')
 Plugin 'VundleVim/Vundle.vim'
-Plugin 'scrooloose/nerdtree'
+Plugin 'flazz/vim-colorschemes'
 Plugin 'bling/vim-airline'
 call vundle#end()
 filetype indent plugin on
@@ -12,6 +12,7 @@ set hidden
 set wildmenu
 set showcmd
 set hlsearch
+set incsearch
 set nomodeline
 set ignorecase
 set smartcase
@@ -25,14 +26,22 @@ set confirm
 set visualbell
 set mouse=a
 set cmdheight=2
-set number
 set notimeout ttimeout ttimeoutlen=200
 set shiftwidth=4
 set softtabstop=4
 set expandtab
 set t_Co=256
-colorscheme monokai
-
-"Start NERD tree if not files are specified on vim execution
-autocmd StdinReadPre * let s:std_in=1
-autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+colorscheme molokai
+set background=dark
+"Disable vim theme background
+hi Normal ctermbg=none
+"Set 'Visual mode' selection background color
+hi Visual ctermbg=darkgrey
+"Set relativenumber on focused doc
+set number relativenumber
+augroup numbertoggle
+  autocmd!
+  autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
+  autocmd BufLeave,FocusLost,InsertEnter   * set norelativenumber
+augroup END
+"
