@@ -3,11 +3,13 @@ filetype off
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin('~/.vim/plugged')
 Plugin 'VundleVim/Vundle.vim'
+Plugin 'sjl/badwolf'
 Plugin 'flazz/vim-colorschemes'
 Plugin 'bling/vim-airline'
 call vundle#end()
 filetype indent plugin on
 syntax on
+set cursorline
 set hidden
 set wildmenu
 set showcmd
