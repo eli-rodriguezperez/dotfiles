@@ -106,6 +106,11 @@
   :non-normal-prefix "M-SPC"
   "TAB" '(switch-to-prev-buffer :which-key "previous buffer")
   "SPC" '(helm-M-x :which-key "M-x")
+  ;; Company
+  "a"   '(:which-key "Company")
+  "aa"  '(company-complete :which-key "complete current word")
+  ;; Files
+  "f"   '(:which-key "File")
   "ff"  '(helm-find-files :which-key "find files")
   ;; Buffers
   "b"   '(:which-key "Buffer")
@@ -131,6 +136,19 @@
   :config
   (projectile-global-mode))
 
+;; Set up completion mode
+(use-package company
+  :ensure t
+  :config
+  (company-mode 1))
+
+;; Org mode packages
+(use-package ox-pandoc
+  :ensure t)
+(use-package org-bullets
+  :ensure t)
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -138,7 +156,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (projectile general which-key linum-relative helm gruvbox-theme evil-escape use-package-ensure-system-package evil))))
+    (org-bullets ox-pandoc company projectile general which-key linum-relative helm gruvbox-theme evil-escape use-package-ensure-system-package evil))))
 
 
 (custom-set-faces
