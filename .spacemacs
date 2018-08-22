@@ -340,7 +340,7 @@ you should place your code here."
   (define-key evil-visual-state-map "k" 'evil-previous-visual-line)
   (setq-default scroll-margin 0)
   (setq-default scroll-conservatively 0)
-  (which-key-mode)
+  (setq org-agenda-files '("~/Dropbox/org"))
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
