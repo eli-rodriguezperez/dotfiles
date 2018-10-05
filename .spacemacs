@@ -332,15 +332,25 @@ you should place your code here."
   (load-theme 'gruvbox)
   (setq-default dotspacemacs-configuration-layers '(
                                                     (colors :variables colors-colorize-identifiers 'all)))
+  (setq-default dotspacemacs-configuration-layers '(
+                                                    (colors :variables colors-colorize-identifiers 'all)))
+
   ;; Make evil-mode up/down operate in screen lines instead of logical lines
   (define-key evil-motion-state-map "j" 'evil-next-visual-line)
   (define-key evil-motion-state-map "k" 'evil-previous-visual-line)
+
   ;; Also in visual mode
   (define-key evil-visual-state-map "j" 'evil-next-visual-line)
   (define-key evil-visual-state-map "k" 'evil-previous-visual-line)
+
+  ;; Define ñ to do the same as ; in normal state
+  (define-key evil-motion-state-map "ñ" 'evil-repeat-find-char)
+
   (setq-default scroll-margin 0)
   (setq-default scroll-conservatively 0)
   (setq org-agenda-files '("~/Dropbox/org"))
+  (setq projectile-enable-caching t)
+
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
