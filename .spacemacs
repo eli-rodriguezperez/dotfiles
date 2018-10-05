@@ -332,8 +332,6 @@ you should place your code here."
   (load-theme 'gruvbox)
   (setq-default dotspacemacs-configuration-layers '(
                                                     (colors :variables colors-colorize-identifiers 'all)))
-  (setq-default dotspacemacs-configuration-layers '(
-                                                    (colors :variables colors-colorize-identifiers 'all)))
 
   ;; Make evil-mode up/down operate in screen lines instead of logical lines
   (define-key evil-motion-state-map "j" 'evil-next-visual-line)
