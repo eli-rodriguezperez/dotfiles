@@ -72,6 +72,11 @@
   :ensure t
   :config
   (evil-mode 1))
+;; evil surround feature with s
+(use-package evil-surround
+  :ensure t
+  :config
+  (global-evil-surround-mode 1))
 ;; binds "jk" to the escape key in evil mode
 (use-package evil-escape
   :ensure t
@@ -163,7 +168,7 @@ Repeated invocations toggle between the two most recently open buffers."
 	   "w/"  '(split-window-right :which-key "split right")
 	   "w-"  '(split-window-below :which-key "split bottom")
 	   "wd"  '(delete-window :which-key "delete window")
-	   ;;Projectile
+	   ;; Projectile
 	   "p"   '(:which-key "Project")
 	   "pf"  '(counsel-projectile-find-file :which-key "find project file")
 	   "pp"  '(counsel-projectile-switch-project :which-key "switch project")
@@ -212,7 +217,7 @@ Repeated invocations toggle between the two most recently open buffers."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (proxy-mode counsel-projectile magit evil-magit org-bullets ox-pandoc company projectile general which-key linum-relative helm gruvbox-theme evil-escape use-package-ensure-system-package evil))))
+    (evil-org proxy-mode counsel-projectile magit evil-magit org-bullets ox-pandoc company projectile general which-key linum-relative helm gruvbox-theme evil-escape use-package-ensure-system-package evil))))
 
 
 (custom-set-faces
