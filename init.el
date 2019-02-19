@@ -21,7 +21,7 @@
 (show-paren-mode 1)
 
 ;; Automatically write matching parens
- (electric-pair-mode t)
+(electric-pair-mode t)
 
 ;; Disable backup files
 (setq make-backup-files nil) ; stop creating backup~ files
@@ -38,7 +38,12 @@
 (setq tab-width 2)
 
 ;; WINDOWS
-(setq shell-file-name "C:\\msys64\\usr\\bin\\bash.exe")
+(setq explicit-shell-file-name "C:\\msys64\\usr\\bin\\bash.exe")
+(setq shell-file-name "bash")
+(setq explicit-bash.exe-args '("--noediting" "--login" "-i"))
+(setenv "SHELL" shell-file-name)
+(add-hook 'comint-output-filter-functions 'comint-strip-ctrl-m)
+
 ;; Set external tools for windows indexing
 (setq projectile-indexing-method (quote turbo-alien))
 ;;
@@ -228,13 +233,13 @@ Repeated invocations toggle between the two most recently open buffers."
            "p&"  '(async-shell-command :which-key "async shell command")
            "p$"  '(shell-command :which-key "shell command")
            ;; Search
-           "s" '(:which-key "Search")
+           "s"   '(:which-key "Search")
            "sg"  '(counsel-projectile-git-grep :which-key "grep project")
            ;; Version Control
-           "v" '(:which-key "Version Control")
+           "v"   '(:which-key "Version Control")
            "vm"  '(magit :which-key "launch magit")
            ;; Dotfiles
-           "d" '(:which-key "Dotfiles")
+           "d"   '(:which-key "Dotfiles")
            "de"  '(edit-init-el :which-key "edit emacs\' init.el")
            ))
 
@@ -305,7 +310,7 @@ Repeated invocations toggle between the two most recently open buffers."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (markdown-mode evil-visualstar helm-projectile web-mode web-beautify tern helm-gtags ggtags evil-org proxy-mode counsel-projectile magit evil-magit org-bullets ox-pandoc company projectile general which-key linum-relative helm gruvbox-theme evil-escape use-package-ensure-system-package evil))))
+    (editorconfig spaceline-all-the-icons all-the-icons-dired all-the-icons-gnus all-the-icons-ivy doom-modeline markdown-mode evil-visualstar helm-projectile web-mode web-beautify tern helm-gtags ggtags evil-org proxy-mode counsel-projectile magit evil-magit org-bullets ox-pandoc company projectile general which-key linum-relative helm gruvbox-theme evil-escape use-package-ensure-system-package evil))))
 
 
 (custom-set-faces
