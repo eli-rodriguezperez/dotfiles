@@ -251,6 +251,12 @@ Repeated invocations toggle between the two most recently open buffers."
   (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
   (projectile-mode 1))
+
+;;Flycheck
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode))
+
 ;; Org mode packages
 (use-package ox-pandoc
   :ensure t)
@@ -265,17 +271,14 @@ Repeated invocations toggle between the two most recently open buffers."
   :mode "\\.js\\'\\|\\.json\\'"
   :interpreter "node"
   :config
-  (setq-default js2-basic-offset 2)
-  (add-hook 'js2-init-hook 'disable-tabs)
-  (web-mode 1))
+  (setq-default js2-basic-offset 2))
+
 (use-package json-mode
   :mode "\\.json\\'")
-(use-package web-beautify
-  :ensure t
-  :mode "\\.js\\'")
+
 (use-package web-mode
   :ensure t
-  :mode "\\.js\\'\\|\\.json\\|\\.html\\'"
+  :mode "\\.html\\'"
   :init
   (setq web-mode-markup-indent-offset 2)
   (setq web-mode-css-indent-offset 2)
@@ -295,22 +298,23 @@ Repeated invocations toggle between the two most recently open buffers."
   :config
   (company-mode 1))
 (add-hook 'after-init-hook 'global-company-mode)
-(use-package tide
-  :ensure t
-  :init
-  (tide-setup))
+
+(use-package company-tern
+  :ensure t)
+(add-to-list 'company-backends 'company-tern)
+
 (add-hook 'js2-mode-hook (lambda ()
-                           (tide-mode 1)
-                           (company-mode +1)
-                           (web-mode 1)))
+                           (tern-mode)
+                           (company-mode +1)))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(company-idle-delay 0.1)
  '(package-selected-packages
    (quote
-    (editorconfig spaceline-all-the-icons all-the-icons-dired all-the-icons-gnus all-the-icons-ivy doom-modeline markdown-mode evil-visualstar helm-projectile web-mode web-beautify tern helm-gtags ggtags evil-org proxy-mode counsel-projectile magit evil-magit org-bullets ox-pandoc company projectile general which-key linum-relative helm gruvbox-theme evil-escape use-package-ensure-system-package evil))))
+    (company-tern editorconfig spaceline-all-the-icons all-the-icons-dired all-the-icons-gnus all-the-icons-ivy doom-modeline markdown-mode evil-visualstar helm-projectile web-mode web-beautify tern helm-gtags ggtags evil-org proxy-mode counsel-projectile magit evil-magit org-bullets ox-pandoc company projectile general which-key linum-relative helm gruvbox-theme evil-escape use-package-ensure-system-package evil))))
 
 
 (custom-set-faces
