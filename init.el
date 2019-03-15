@@ -73,10 +73,10 @@
 (require 'use-package)
 
 ;; Theme
-(use-package gruvbox-theme
+(use-package doom-themes
   :ensure t
   :config
-  (load-theme 'gruvbox-dark-hard t))
+  (load-theme 'doom-tomorrow-night t))
 
 ;; Powerline
 (use-package powerline
@@ -133,9 +133,27 @@
 ;; Set ñ to do the same as ;
 (define-key evil-motion-state-map "ñ" 'evil-repeat-find-char)
 
+;; Company menu navigation
+(define-key evil-insert-state-map (kbd "C-j") 'company-select-next)
+(define-key evil-insert-state-map (kbd "C-k") 'company-select-previous)
+(define-key evil-insert-state-map (kbd "C-l") 'company-complete-selection)
+
+;; Minibuffer navigation
+(define-key minibuffer-local-must-match-map (kbd "C-j") 'next-history-element)
+(define-key minibuffer-local-must-match-map (kbd "C-k") 'previous-history-element)
+
+;; When deleting a whitespace, delete the rest until a non whitespace char
+(use-package hungry-delete
+  :ensure t
+  :config
+  (global-hungry-delete-mode))
+;; Delete unnecessary whitespace's before saving)
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+
 ;; Set hippie-expand to only search for filenames, useful for autocompleting relative paths
 (setq hippie-expand-try-functions-list
       '(try-complete-file-name))
+
 ;; Set key to use hippie expand
 (global-set-key (kbd "M-ñ") 'company-files)
 
@@ -240,14 +258,14 @@ Repeated invocations toggle between the two most recently open buffers."
            "vm"  '(magit :which-key "launch magit")
            ;; Dotfiles
            "d"   '(:which-key "Dotfiles")
-           "de"  '(edit-init-el :which-key "edit emacs\' init.el")
-           ))
+           "de"  '(edit-init-el :which-key "edit emacs\' init.el")))
 
 ;; Projectile
 (use-package projectile
   :ensure t
   :init
   :config
+  (setq projectile-enable-caching t)
   (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
   (projectile-mode 1))
@@ -300,7 +318,10 @@ Repeated invocations toggle between the two most recently open buffers."
 (add-hook 'after-init-hook 'global-company-mode)
 
 (use-package company-tern
-  :ensure t)
+  :ensure t
+  :config
+  (setq tern-command '("node" "c:/nodejs/node_modules/tern/bin/tern")))
+
 (add-to-list 'company-backends 'company-tern)
 
 (add-hook 'js2-mode-hook (lambda ()
@@ -311,10 +332,14 @@ Repeated invocations toggle between the two most recently open buffers."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(beacon-mode t)
  '(company-idle-delay 0.1)
+ '(custom-safe-themes
+   (quote
+    ("6b289bab28a7e511f9c54496be647dc60f5bd8f9917c9495978762b99d8c96a0" "75d3dde259ce79660bac8e9e237b55674b910b470f313cdf4b019230d01a982a" "151bde695af0b0e69c3846500f58d9a0ca8cb2d447da68d7fbf4154dcf818ebc" "10461a3c8ca61c52dfbbdedd974319b7f7fd720b091996481c8fb1dded6c6116" "4697a2d4afca3f5ed4fdf5f715e36a6cac5c6154e105f3596b44a4874ae52c45" "6d589ac0e52375d311afaa745205abb6ccb3b21f6ba037104d71111e7e76a3fc" "f0dc4ddca147f3c7b1c7397141b888562a48d9888f1595d69572db73be99a024" "fe666e5ac37c2dfcf80074e88b9252c71a22b6f5d2f566df9a7aa4f9bea55ef8" "d2e9c7e31e574bf38f4b0fb927aaff20c1e5f92f72001102758005e53d77b8c9" "a3fa4abaf08cc169b61dea8f6df1bbe4123ec1d2afeb01c17e11fdc31fc66379" "8aca557e9a17174d8f847fb02870cb2bb67f3b6e808e46c0e54a44e3e18e1020" "7e78a1030293619094ea6ae80a7579a562068087080e01c2b8b503b27900165c" "100e7c5956d7bb3fd0eebff57fde6de8f3b9fafa056a2519f169f85199cc1c96" "93a0885d5f46d2aeac12bf6be1754faa7d5e28b27926b8aa812840fe7d0b7983" default)))
  '(package-selected-packages
    (quote
-    (company-tern editorconfig spaceline-all-the-icons all-the-icons-dired all-the-icons-gnus all-the-icons-ivy doom-modeline markdown-mode evil-visualstar helm-projectile web-mode web-beautify tern helm-gtags ggtags evil-org proxy-mode counsel-projectile magit evil-magit org-bullets ox-pandoc company projectile general which-key linum-relative helm gruvbox-theme evil-escape use-package-ensure-system-package evil))))
+    (hungry-delete simple counsel-gtags tide doom-themes company-tern editorconfig spaceline-all-the-icons all-the-icons-dired all-the-icons-gnus all-the-icons-ivy doom-modeline markdown-mode evil-visualstar helm-projectile web-mode web-beautify tern helm-gtags ggtags evil-org proxy-mode counsel-projectile magit evil-magit org-bullets ox-pandoc company projectile general which-key linum-relative helm gruvbox-theme evil-escape use-package-ensure-system-package evil))))
 
 
 (custom-set-faces
