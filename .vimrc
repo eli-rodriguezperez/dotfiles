@@ -4,17 +4,15 @@ set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin('~/.vim/plugged')
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'docunext/closetag.vim'
-Plugin 'ervandew/eclim'
 Plugin 'tpope/vim-commentary'
 Plugin 'tpope/vim-eunuch'
-Plugin 'junegunn/fzf'
+Plugin 'tpope/vim-surround'
+Plugin 'kien/ctrlp.vim'
+Plugin 'vim-syntastic/syntastic'
 Plugin 'tpope/vim-fugitive'
 Plugin 'sheerun/vim-polyglot'
-Plugin 'junegunn/goyo.vim'
-Plugin 'uncrustify/uncrustify'
 Plugin 'sbdchd/neoformat'
 Plugin 'joshdick/onedark.vim'
-Plugin 'sjl/badwolf'
 Plugin 'dracula/vim'
 Plugin 'flazz/vim-colorschemes'
 Plugin 'bling/vim-airline'
@@ -40,14 +38,14 @@ set visualbell
 set mouse=a
 set cmdheight=2
 set notimeout ttimeout ttimeoutlen=200
-set shiftwidth=4
-set softtabstop=4
+set shiftwidth=2
+set softtabstop=2
 set expandtab
 set autoindent
 set si
 set cinoptions+=j1
 set t_Co=256
-colorscheme molokai
+colorscheme onedark
 set background=dark
 "Disable vim theme background
 hi Normal ctermbg=none
@@ -61,15 +59,28 @@ augroup numbertoggle
     autocmd BufLeave,FocusLost,InsertEnter   * set norelativenumber
 augroup END
 "
-function! ProseMode()
-    call goyo#execute(0, [])
-    set spell noci nosi noai nolist noshowmode noshowcmd
-    set complete+=s
-    set bg=light
-    if !has('gui_running')
-        let g:solarized_termcolors=256
-    endif
-    colors solarized
-endfunction
+" Bindings
+imap jk <Esc>
+cnoremap jk <C-C>
+xnoremap jk <Esc>
+let mapleader= " "
+nmap <leader>dv :e ~/.vimrc <CR>
+nmap <leader>de :e ~/.emacs.d/init.el <CR>
+nmap <leader>bd :bd <CR>
+nmap <leader><tab> :b# <CR>
+nmap <leader>wd :close <CR>
+nmap <leader>wv :vsplit <CR>
+nmap <leader>wh :split <CR>
+nmap <leader>pf :CtrlP <CR>
+nmap <leader>bf :CtrlPBuffer <CR>
+nnoremap <C-J> <C-W><C-J>
+nnoremap <C-K> <C-W><C-K>
+nnoremap <C-L> <C-W><C-L>
+nnoremap <C-H> <C-W><C-H>
+nnoremap Ñ :
+nnoremap ñ ;
+nnoremap - /
+nnoremap _ ?
 
-command! ProseMode call ProseMode()
+let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d'  " Windows
+let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files -co --exclude-standard']
