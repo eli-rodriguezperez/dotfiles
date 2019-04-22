@@ -1,5 +1,11 @@
-;;; Eli emacs config
+;;; package --- Emacs's Conf
+;;; Commentary:
+;; Eli's Emacs config
 
+;; Setting the shell
+(setenv "SHELL" "/bin/bash")
+
+;;; Code:
 ;; Package configs
 (require 'package)
 (setq package-enable-at-startup nil)
@@ -26,7 +32,7 @@
 (menu-bar-mode   -1)
 
 ;; Change default font
-(add-to-list 'default-frame-alist '(font . "mononoki-12"))
+(add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono Book 12"))
 (add-to-list 'default-frame-alist '(height . 24))
 (add-to-list 'default-frame-alist '(width . 80))
 
@@ -52,7 +58,7 @@
 (setq tab-width 2)
 
 ;; Set emacs to open an specific folder on start
-(setq initial-buffer-choice "~/documents")
+(setq initial-buffer-choice "~/Documents")
 
 ;; Show relative numbers
 (global-display-line-numbers-mode 1)
@@ -60,97 +66,6 @@
 ;; Highlight current line
 (global-hl-line-mode +1)
 (setq display-line-numbers-type 'relative)
-
-;; Only jump a single visual line when in a multiline sentence
-(define-key evil-normal-state-map (kbd "j") 'evil-next-visual-line)
-(define-key evil-normal-state-map (kbd "k") 'evil-previous-visual-line)
-
-;; Set ñ to do the same as ;
-(keyboard-translate ?Ñ ?:)
-(keyboard-translate ?: ?Ñ)
-(keyboard-translate ?ñ ?\;)
-(keyboard-translate ?\; ?ñ)
-
-;; Set - to search like you would in an english keyboard
-(define-key evil-motion-state-map "-" 'evil-search-forward)
-(define-key evil-motion-state-map "_" 'evil-search-backward)
-(define-key evil-motion-state-map "ç" 'evil-invert-char)
-
-;; Company menu navigation
-(define-key evil-insert-state-map (kbd "C-j") 'company-select-next)
-(define-key evil-insert-state-map (kbd "C-k") 'company-select-previous)
-(define-key evil-insert-state-map (kbd "C-l") 'company-complete-selection)
-
-;; Minibuffer navigation
-(define-key minibuffer-local-must-match-map (kbd "C-j") 'next-history-element)
-(define-key minibuffer-local-must-match-map (kbd "C-k") 'previous-history-element)
-
-;; WORK
-;;set proxy
-(setq url-proxy-services '(("no_proxy" . "work\\.com")
-                           ("http" . "127.0.0.1:8081")
-                           ("https" . "127.0.0.1:8081")))
-;;
-
-;;; WINDOWS
-(setq explicit-shell-file-name "C:\\msys64\\usr\\bin\\bash.exe")
-(setq shell-file-name "bash")
-(setq explicit-bash.exe-args '("--noediting" "--login" "-i"))
-(setenv "SHELL" shell-file-name)
-(add-hook 'comint-output-filter-functions 'comint-strip-ctrl-m)
-;;GTAGSROOT
-(setq GTAGSROOT "C:\\GTAGS")
-;; Set external tools for windows indexing
-(setq projectile-indexing-method (quote turbo-alien))
-;; Powerline
-(use-package powerline
-  :ensure t
-  :config
-  (setq powerline-default-separator "wave")
-  )
-
-(use-package powerline-evil
-  :ensure t
-  :config
-  :init
-  (powerline-evil-center-color-theme)
-  )
-;;;
-
-;; Theme
-(use-package doom-themes
-  :ensure t
-  :config
-  (load-theme 'doom-tomorrow-night t))
-
-;; Doom modeline, requires fonts which need admin rights to install
-;; (use-package doom-modeline
-;;       :ensure t
-;;       :hook (after-init . doom-modeline-mode))
-
-;; All the icons for doom-modeline
-(use-package all-the-icons
-  :ensure t)
-
-;; Projectile
-(use-package projectile
-  :ensure t
-  :init
-  :config
-  (setq projectile-enable-caching t)
-  (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
-  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-  (projectile-mode 1))
-
-;; Helm projectile
-(use-package helm-projectile
-  :ensure t)
-
-;; Consistend coding styles for everybody in the same project
-(use-package editorconfig
-  :ensure t
-  :config
-  (editorconfig-mode 1))
 
 ;; Vim style modal editing
 (use-package evil
@@ -184,8 +99,78 @@
   :ensure t
   :config
   (evil-commentary-mode))
-(use-package evil-vimish-fold
+
+;; When using daemon load things correctly
+(defun init-my-config (&optional _frame)
+  (load "~/.emacs.d/init.el")
+  (doom-modeline-refresh-bars))
+
+(defun my-reload-config-in-daemon (frame)
+  (when (or (daemonp) (not (display-graphic-p)))
+    (with-selected-frame frame
+      (run-with-timer 0.1 nil #'init-my-config))))
+
+(add-hook 'after-make-frame-functions #'my-reload-config-in-daemon)
+
+;; Only jump a single visual line when in a multiline sentence
+(define-key evil-normal-state-map (kbd "j") 'evil-next-visual-line)
+(define-key evil-normal-state-map (kbd "k") 'evil-previous-visual-line)
+
+;; Set ñ to do the same as ;
+(keyboard-translate ?Ñ ?:)
+(keyboard-translate ?: ?Ñ)
+(keyboard-translate ?ñ ?\;)
+(keyboard-translate ?\; ?ñ)
+
+;; Set - to search like you would in an english keyboard
+(define-key evil-motion-state-map "-" 'evil-search-forward)
+(define-key evil-motion-state-map "_" 'evil-search-backward)
+(define-key evil-motion-state-map "ç" 'evil-invert-char)
+
+;; Company menu navigation
+(define-key evil-insert-state-map (kbd "C-j") 'company-select-next)
+(define-key evil-insert-state-map (kbd "C-k") 'company-select-previous)
+(define-key evil-insert-state-map (kbd "C-l") 'company-complete-selection)
+
+;; Minibuffer navigation
+(define-key minibuffer-local-must-match-map (kbd "C-j") 'next-history-element)
+(define-key minibuffer-local-must-match-map (kbd "C-k") 'previous-history-element)
+
+;; Theme
+(use-package doom-themes
+  :ensure t
+  :config
+  (load-theme 'doom-tomorrow-night t))
+
+;; Doom modeline, requires fonts which need admin rights to install
+(use-package doom-modeline
+  :ensure t
+  :hook (after-init . doom-modeline-mode))
+
+;; All the icons for doom-modeline
+(use-package all-the-icons
   :ensure t)
+
+;; Projectile
+(use-package projectile
+  :ensure t
+  :init
+  :config
+  (setq projectile-enable-caching t)
+  (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
+  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+  (projectile-mode 1))
+
+;; Helm projectile
+(use-package helm-projectile
+  :ensure t)
+
+;; Consistend coding styles for everybody in the same project
+(use-package editorconfig
+  :ensure t
+  :config
+  (editorconfig-mode 1))
+
 ;; Magit
 (use-package evil-magit
   :ensure t)
@@ -244,7 +229,7 @@
 ;; Set function to change to previous buffer
 (defun er-switch-to-previous-buffer ()
   "Switch to previously open buffer.
-Repeated invocations toggle between the two most recently open buffers."
+  Repeated invocations toggle between the two most recently open buffers."
   (interactive)
   (switch-to-buffer (other-buffer (current-buffer) 1)))
 
@@ -272,19 +257,19 @@ Repeated invocations toggle between the two most recently open buffers."
   :ensure t
   :init
   (setq helm-M-x-fuzzy-match t
-	helm-mode-fuzzy-match t
-	helm-buffers-fuzzy-matching t
-	helm-recentf-fuzzy-match t
-	helm-locate-fuzzy-match t
-	helm-semantic-fuzzy-match t
-	helm-imenu-fuzzy-match t
-	helm-completion-in-region-fuzzy-match t
-	helm-candidate-number-list 80
-	helm-split-window-in-side-p t
-	helm-move-to-line-cycle-in-source t
-	helm-echo-input-in-header-line t
-	helm-autoresize-max-height 0
-	helm-autoresize-min-height 20)
+        helm-mode-fuzzy-match t
+        helm-buffers-fuzzy-matching t
+        helm-recentf-fuzzy-match t
+        helm-locate-fuzzy-match t
+        helm-semantic-fuzzy-match t
+        helm-imenu-fuzzy-match t
+        helm-completion-in-region-fuzzy-match t
+        helm-candidate-number-list 80
+        helm-split-window-in-side-p t
+        helm-move-to-line-cycle-in-source t
+        helm-echo-input-in-header-line t
+        helm-autoresize-max-height 0
+        helm-autoresize-min-height 20)
   :config
   (helm-mode 1))
 
@@ -328,6 +313,13 @@ Repeated invocations toggle between the two most recently open buffers."
            "w/"  '(split-window-right :which-key "split right")
            "w-"  '(split-window-below :which-key "split bottom")
            "wd"  '(delete-window :which-key "delete window")
+           "wo"  '(delete-other-windows :which-key "delete other windows")
+           "wm"  '(maximize-window :which-key "toggle maximize window")
+           "wb"  '(balance-windows :which-key "equalizes window size")
+           ;; Frames
+           "mn"  '(new-frame :which-key "new frame")
+           "mx"  '(delete-frame :which-key "delete current frame")
+           "mm"  '(toggle-frame-maximized :which-key "toggle maximize frame")
            ;; Projectile
            "p"   '(:which-key "Project")
            "pf"  '(helm-projectile-find-file :which-key "find project file")
@@ -363,7 +355,9 @@ Repeated invocations toggle between the two most recently open buffers."
   :config
   (setq flycheck-pos-tip-timeout 10
         flycheck-display-errors-delay 0.5))
-(add-hook 'global-flycheck-mode-hook (lambda () (flycheck-pos-tip-mode)))
+(add-hook 'global-flycheck-mode-hook (lambda ()
+                                       (flycheck-pos-tip-mode)
+                                       (flycheck-rust-setup)))
 
 ;; Language Server Protocol integration
 (use-package lsp-mode
@@ -372,12 +366,12 @@ Repeated invocations toggle between the two most recently open buffers."
   :init)
 
 (use-package lsp-ui
-    :ensure t
-    :commands lsp-ui-mode)
+  :ensure t
+  :commands lsp-ui-mode)
 
 (use-package company-lsp
-      :ensure t
-      :commands company-lsp)
+  :ensure t
+  :commands company-lsp)
 
 ;; Org mode packages
 (use-package ox-pandoc
@@ -386,8 +380,23 @@ Repeated invocations toggle between the two most recently open buffers."
   :ensure t)
 (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 
-
 ;; PROGRAMMING LANGUAGES
+;; rust
+(use-package rust-mode
+  :ensure t
+  :mode "\\.rs\\'"
+  :init
+  (setq rust-format-on-save t))
+
+(use-package flycheck-rust
+  :ensure t
+  :after flycheck
+  :commands flycheck-rust-setup)
+
+(use-package lsp-rust
+  :after lsp-mode)
+
+;; javascript
 (use-package js2-mode
   :ensure t
   :mode "\\.js\\'\\|\\.json\\'"
@@ -424,9 +433,7 @@ Repeated invocations toggle between the two most recently open buffers."
 (setq company-idle-delay 0.1)
 
 (use-package company-tern
-  :ensure t
-  :config
-  (setq tern-command '("node" "c:/nodejs/node_modules/tern/bin/tern")))
+  :ensure t)
 
 (add-to-list 'company-backends 'company-tern)
 
@@ -436,6 +443,39 @@ Repeated invocations toggle between the two most recently open buffers."
                            (company-mode +1)))
 (add-hook 'css-mode-hook (lambda ()
                            (electric-operator-mode)))
+
+;; ;; WORK
+;; ;;set proxy
+;; (setq url-proxy-services '(("no_proxy" . "work\\.com")
+;;                            ("http" . "127.0.0.1:8081")
+;;                            ("https" . "127.0.0.1:8081")))
+;; ;;
+
+;; ;;; WINDOWS
+;; (setq explicit-shell-file-name "C:\\msys64\\usr\\bin\\bash.exe")
+;; (setq shell-file-name "bash")
+;; (setq explicit-bash.exe-args '("--noediting" "--login" "-i"))
+;; (setenv "SHELL" shell-file-name)
+;; (add-hook 'comint-output-filter-functions 'comint-strip-ctrl-m)
+;; ;;GTAGSROOT
+;; (setq GTAGSROOT "C:\\GTAGS")
+;; ;; Set external tools for windows indexing
+;; (setq projectile-indexing-method (quote turbo-alien))
+;; ;; Powerline
+;; (use-package powerline
+;;   :ensure t
+;;   :config
+;;   (setq powerline-default-separator "wave")
+;;   )
+
+;; (use-package powerline-evil
+;;   :ensure t
+;;   :config
+;;   :init
+;;   (powerline-evil-center-color-theme)
+;;   )
+;; ;;;
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -446,7 +486,7 @@ Repeated invocations toggle between the two most recently open buffers."
     ("eec08f7474a519de14f12bff9eef27a9c2f89422b00a2a37bd7d94ed4fcccae4" "6b289bab28a7e511f9c54496be647dc60f5bd8f9917c9495978762b99d8c96a0" "75d3dde259ce79660bac8e9e237b55674b910b470f313cdf4b019230d01a982a" "151bde695af0b0e69c3846500f58d9a0ca8cb2d447da68d7fbf4154dcf818ebc" "10461a3c8ca61c52dfbbdedd974319b7f7fd720b091996481c8fb1dded6c6116" "4697a2d4afca3f5ed4fdf5f715e36a6cac5c6154e105f3596b44a4874ae52c45" "6d589ac0e52375d311afaa745205abb6ccb3b21f6ba037104d71111e7e76a3fc" "f0dc4ddca147f3c7b1c7397141b888562a48d9888f1595d69572db73be99a024" "fe666e5ac37c2dfcf80074e88b9252c71a22b6f5d2f566df9a7aa4f9bea55ef8" "d2e9c7e31e574bf38f4b0fb927aaff20c1e5f92f72001102758005e53d77b8c9" "a3fa4abaf08cc169b61dea8f6df1bbe4123ec1d2afeb01c17e11fdc31fc66379" "8aca557e9a17174d8f847fb02870cb2bb67f3b6e808e46c0e54a44e3e18e1020" "7e78a1030293619094ea6ae80a7579a562068087080e01c2b8b503b27900165c" "100e7c5956d7bb3fd0eebff57fde6de8f3b9fafa056a2519f169f85199cc1c96" "93a0885d5f46d2aeac12bf6be1754faa7d5e28b27926b8aa812840fe7d0b7983" default)))
  '(package-selected-packages
    (quote
-    (neotree helm-ag helm-rg xterm-color evil-matchit anzu ag pt ripgrep company-lsp lsp-ui lsp-mode dumb-jump vimrc-mode evil-vimish-fold evil-commentary flycheck-pos-tip electric-operator origami hungry-delete simple counsel-gtags tide doom-themes company-tern editorconfig spaceline-all-the-icons all-the-icons-dired all-the-icons-gnus all-the-icons-ivy doom-modeline markdown-mode evil-visualstar helm-projectile web-mode web-beautify tern helm-gtags ggtags evil-org proxy-mode counsel-projectile magit evil-magit org-bullets ox-pandoc company projectile general which-key linum-relative helm gruvbox-theme evil-escape use-package-ensure-system-package evil))))
+    (flycheck-rust rust-mode toml neotree helm-ag helm-rg xterm-color evil-matchit anzu ag pt ripgrep company-lsp lsp-ui lsp-mode dumb-jump vimrc-mode evil-vimish-fold evil-commentary flycheck-pos-tip electric-operator origami hungry-delete simple counsel-gtags tide doom-themes company-tern editorconfig spaceline-all-the-icons all-the-icons-dired all-the-icons-gnus all-the-icons-ivy doom-modeline markdown-mode evil-visualstar helm-projectile web-mode web-beautify tern helm-gtags ggtags evil-org proxy-mode counsel-projectile magit evil-magit org-bullets ox-pandoc company general which-key linum-relative helm gruvbox-theme evil-escape use-package-ensure-system-package evil))))
 
 
 (custom-set-faces
