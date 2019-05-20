@@ -2,9 +2,6 @@
 ;;; Commentary:
 ;; Eli's Emacs config
 
-;; Setting the shell
-(setenv "SHELL" "/bin/bash")
-
 ;;; Code:
 ;; Package configs
 (require 'package)
@@ -30,7 +27,7 @@
 (tool-bar-mode   -1)
 (tooltip-mode    -1)
 (menu-bar-mode   -1)
-
+(global-auto-revert-mode)
 ;; Change default font
 (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono Book 12"))
 (add-to-list 'default-frame-alist '(height . 24))
@@ -62,10 +59,31 @@
 
 ;; Show relative numbers
 (global-display-line-numbers-mode 1)
+(setq display-line-numbers-type 'relative)
+
+;; Set org-agenda files
+(setq org-agenda-files (list "~/documents/org/agenda.org"))
+(setq org-catch-invisible-edits 'error)
 
 ;; Highlight current line
 (global-hl-line-mode +1)
-(setq display-line-numbers-type 'relative)
+
+;; Save the cursor position in buffer for future sessions
+(save-place-mode 1)
+
+;; Changes how emacs shows when two buffers are named the same
+(setq uniquify-buffer-name-style 'forward)
+
+(setq save-interprogram-paste-before-kill t
+      apropos-do-all t
+      mouse-yank-at-point t
+      require-final-newline t
+      visible-bell t
+      load-prefer-newer t
+      ediff-window-setup-function 'ediff-setup-windows-plain
+      save-place-file (concat user-emacs-directory "places")
+      backup-directory-alist `(("." . ,(concat user-emacs-directory
+                                               "backups"))))
 
 ;; Vim style modal editing
 (use-package evil
@@ -116,17 +134,6 @@
 (define-key evil-normal-state-map (kbd "j") 'evil-next-visual-line)
 (define-key evil-normal-state-map (kbd "k") 'evil-previous-visual-line)
 
-;; Set ñ to do the same as ;
-(keyboard-translate ?Ñ ?:)
-(keyboard-translate ?: ?Ñ)
-(keyboard-translate ?ñ ?\;)
-(keyboard-translate ?\; ?ñ)
-
-;; Set - to search like you would in an english keyboard
-(define-key evil-motion-state-map "-" 'evil-search-forward)
-(define-key evil-motion-state-map "_" 'evil-search-backward)
-(define-key evil-motion-state-map "ç" 'evil-invert-char)
-
 ;; Company menu navigation
 (define-key evil-insert-state-map (kbd "C-j") 'company-select-next)
 (define-key evil-insert-state-map (kbd "C-k") 'company-select-previous)
@@ -139,8 +146,11 @@
 ;; Theme
 (use-package doom-themes
   :ensure t
+  )
+(use-package solarized-theme
+  :ensure t
   :config
-  (load-theme 'doom-tomorrow-night t))
+  (load-theme 'solarized-dark t))
 
 ;; Doom modeline, requires fonts which need admin rights to install
 (use-package doom-modeline
@@ -211,18 +221,9 @@
 ;; Delete unnecessary whitespace's before saving)
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
-;; Set hippie-expand to only search for filenames, useful for autocompleting relative paths
-(setq hippie-expand-try-functions-list
-      '(try-complete-file-name))
-
-(defun hippie-expand-lines ()
-  (interactive)
-  (let ((hippie-expand-try-functions-list
-         '(try-expand-list
-           try-expand-list-all-buffers
-           try-expand-line
-           try-expand-line-all-buffers)))
-    (hippie-expand nil)))
+;; Google this, googles what's under cursor
+(use-package google-this
+  :ensure t)
 
 (setq hippie-expand-dabbrev-skip-space t)
 
@@ -251,6 +252,11 @@
   "Open init file."
   (interactive)
   (find-file "~/.vimrc"))
+
+(defun reload-config ()
+  "Reload init.el config file."
+  (interactive)
+  (load-file "~/.emacs.d/init.el"))
 
 ;; Helm
 (use-package helm
@@ -297,6 +303,7 @@
            ;; Files
            "f"   '(:which-key "File")
            "ff"  '(counsel-find-file :which-key "find files")
+           "f."  '(find-file-at-point :which-key "find file at point")
            "ft"  '(neotree-toggle :which-key "toggle neotree")
            ;; Buffers
            "b"   '(:which-key "Buffer")
@@ -324,6 +331,8 @@
            "p"   '(:which-key "Project")
            "pf"  '(helm-projectile-find-file :which-key "find project file")
            "pp"  '(helm-projectile-switch-project :which-key "switch project")
+           "pr"  '(projectile-replace :which-key "replace in project")
+           "pm"  '(projectile-command-map :which-key "replace in project")
            "p&"  '(async-shell-command :which-key "async shell command")
            "p$"  '(shell-command :which-key "shell command")
            ;; Search
@@ -336,7 +345,21 @@
            ;; Dotfiles
            "d"   '(:which-key "Dotfiles")
            "de"  '(edit-init-el :which-key "edit emacs\' init.el")
-           "dv"  '(edit-vimrc :which-key "edit vim's .vimrc")))
+           "dv"  '(edit-vimrc :which-key "edit vim's .vimrc")
+           ;; Error checking
+           "e"   '(:which-key "Error")
+           "el"  '(flycheck-error-list :which-key "List errors")
+           "en"  '(flycheck-error-list-next-error :which-key "Go to next error")
+           "ep"  '(flycheck-error-list-previous-error :which-key "Go to previous error")
+           ;; Go to
+           "g"   '(:which-key "Go to")
+           "gt"  '(google-this :which-key "google selection")
+           "gx"  '(browse-url :which-key "open url")
+           ;; Utilities
+           "u"   '(:which-key "Utilities")
+           "ur"  '(reload-config  :which-key "reload config")
+           ))
+
 
 ;; NeoTree
 (use-package neotree
