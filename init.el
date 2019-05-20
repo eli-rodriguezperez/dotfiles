@@ -10,6 +10,8 @@
                          ("gnu"   . "http://elpa.gnu.org/packages/")
                          ("melpa" . "http://melpa.org/packages/")))
 (package-initialize)
+(when (memq window-system '(mac ns x))
+  (exec-path-from-shell-initialize))
 
 ;; Bootstrap `use-package`
 (unless (package-installed-p 'use-package)
@@ -29,9 +31,12 @@
 (menu-bar-mode   -1)
 (global-auto-revert-mode)
 ;; Change default font
-(add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono Book 12"))
+(add-to-list 'default-frame-alist '(font . "Roboto Mono 12"))
 (add-to-list 'default-frame-alist '(height . 24))
 (add-to-list 'default-frame-alist '(width . 80))
+
+;; Ask before closing emacs
+(setq confirm-kill-emacs 'y-or-n-p)
 
 ;; Show matching parens
 (setq show-paren-delay 0)
@@ -85,6 +90,9 @@
       backup-directory-alist `(("." . ,(concat user-emacs-directory
                                                "backups"))))
 
+;; Navigate text objects with camelCase or snake_case
+(global-subword-mode)
+
 ;; Vim style modal editing
 (use-package evil
   :ensure t
@@ -94,7 +102,7 @@
 (use-package evil-surround
   :ensure t
   :config
-  (global-evil-surround-mode 1))
+  (global-evil-surround-mode))
 ;; binds "jk" to the escape key in evil mode
 (use-package evil-escape
   :ensure t
@@ -120,7 +128,7 @@
 
 ;; When using daemon load things correctly
 (defun init-my-config (&optional _frame)
-  (load "~/.emacs.d/init.el")
+  (load-theme 'solarized-dark t)
   (doom-modeline-refresh-bars))
 
 (defun my-reload-config-in-daemon (frame)
@@ -143,14 +151,17 @@
 (define-key minibuffer-local-must-match-map (kbd "C-j") 'next-history-element)
 (define-key minibuffer-local-must-match-map (kbd "C-k") 'previous-history-element)
 
+;; Loads path from shell into emacs
+(use-package exec-path-from-shell
+  :ensure t)
 ;; Theme
+(load-theme 'solarized-dark t)
+
 (use-package doom-themes
-  :ensure t
-  )
+  :ensure t)
+
 (use-package solarized-theme
-  :ensure t
-  :config
-  (load-theme 'solarized-dark t))
+  :ensure t)
 
 ;; Doom modeline, requires fonts which need admin rights to install
 (use-package doom-modeline
@@ -166,7 +177,6 @@
   :ensure t
   :init
   :config
-  (setq projectile-enable-caching t)
   (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
   (projectile-mode 1))
@@ -221,11 +231,20 @@
 ;; Delete unnecessary whitespace's before saving)
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
-;; Google this, googles what's under cursor
+;; Google this googles what's under cursor
 (use-package google-this
   :ensure t)
 
-(setq hippie-expand-dabbrev-skip-space t)
+;; Highlight block delimiters in a rainbow color scheme to differenciate them better
+(use-package rainbow-delimiters
+  :ensure t
+  :config
+  (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
+(use-package rainbow-mode
+  :ensure t)
+
+(use-package expand-region
+  :ensure t)
 
 ;; Set function to change to previous buffer
 (defun er-switch-to-previous-buffer ()
@@ -300,6 +319,13 @@
            ;; Company
            "a"   '(:which-key "Autocompletion")
            "af"  '(company-files :which-key "Complete file path")
+           ;; Text
+           "t"   '(:which-key "Text")
+           "tr"  '(string-rectangle :which-key "string rectangle")
+           "te"  '(er/expand-region :which-key "expand region")
+           ;; Org
+           "o"   '(:which-key "Org mode")
+           "ox"  '(org-export-dispatch :which-key "export org file")
            ;; Files
            "f"   '(:which-key "File")
            "ff"  '(counsel-find-file :which-key "find files")
@@ -324,7 +350,7 @@
            "wm"  '(maximize-window :which-key "toggle maximize window")
            "wb"  '(balance-windows :which-key "equalizes window size")
            ;; Frames
-           "mn"  '(new-frame :which-key "new frame")
+           "mn"  '(new-frame :which-key "New frame")
            "mx"  '(delete-frame :which-key "delete current frame")
            "mm"  '(toggle-frame-maximized :which-key "toggle maximize frame")
            ;; Projectile
@@ -357,8 +383,7 @@
            "gx"  '(browse-url :which-key "open url")
            ;; Utilities
            "u"   '(:which-key "Utilities")
-           "ur"  '(reload-config  :which-key "reload config")
-           ))
+           "ur"  '(reload-config  :which-key "reload config")))
 
 
 ;; NeoTree
@@ -378,46 +403,85 @@
   :config
   (setq flycheck-pos-tip-timeout 10
         flycheck-display-errors-delay 0.5))
+
 (add-hook 'global-flycheck-mode-hook (lambda ()
-                                       (flycheck-pos-tip-mode)
-                                       (flycheck-rust-setup)))
+                                       (flycheck-pos-tip-mode)))
 
 ;; Language Server Protocol integration
 (use-package lsp-mode
   :ensure t
   :commands lsp
-  :init)
+  :config)
 
 (use-package lsp-ui
-  :ensure t
-  :commands lsp-ui-mode)
+  :ensure t)
 
 (use-package company-lsp
   :ensure t
   :commands company-lsp)
 
-;; Org mode packages
+;; Org mode packages and settings
+(setq org-src-fontify-natively t)
+(setq org-src-tab-acts-natively t)
+
+(use-package evil-org
+  :ensure t
+  :after ox)
 (use-package ox-pandoc
+  :after ox
   :ensure t)
 (use-package org-bullets
+  :after ox
   :ensure t)
-(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+(use-package ox-reveal
+  :after ox
+  :ensure t)
+(use-package ox-hugo
+  :ensure t
+  :after ox)
+(use-package ox-clip
+  :ensure t
+  :after ox)
+
+(add-hook 'org-mode-hook (lambda ()
+                           (org-bullets-mode)
+                           (evil-org-mode)))
+(add-hook 'text-mode-hook 'auto-fill-mode)
+(add-hook 'gfm-mode-hook 'auto-fill-mode)
+(add-hook 'org-mode-hook 'auto-fill-mode)
+;; allow pdflatex to exec shell code so that we can add syntax highlight to pdf's
+(setq org-latex-pdf-process
+      '("xelatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+        "xelatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+        "xelatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
+(setq org-latex-listings 'minted)
 
 ;; PROGRAMMING LANGUAGES
 ;; rust
 (use-package rust-mode
   :ensure t
   :mode "\\.rs\\'"
-  :init
+  :config
   (setq rust-format-on-save t))
+(use-package racer
+  :ensure t
+  :config
+  (define-key rust-mode-map (kbd "TAB") #'company-indent-or-complete-common)
+  (setq company-tooltip-align-annotations t))
+
+(add-hook 'rust-mode-hook (lambda ()
+                            (racer-mode)
+                            (flycheck-rust-setup)))
+(add-hook 'racer-mode-hook #'eldoc-mode)
+
+(use-package cargo
+  :ensure t
+  :after rust-mode)
 
 (use-package flycheck-rust
   :ensure t
   :after flycheck
   :commands flycheck-rust-setup)
-
-(use-package lsp-rust
-  :after lsp-mode)
 
 ;; javascript
 (use-package js2-mode
@@ -425,14 +489,16 @@
   :mode "\\.js\\'\\|\\.json\\'"
   :interpreter "node"
   :config
-  (setq-default js2-basic-offset 2))
+  (setq-default js2-basic-offset 2)
+  (require 'lsp-clients))
 
 (use-package json-mode
   :mode "\\.json\\'")
 
 (use-package web-mode
   :ensure t
-  :mode "\\.html\\'"
+  :hook (rainbow-mode)
+  :mode "\\.html\\'\\|\\.vue\\'"
   :init
   (setq web-mode-markup-indent-offset 2)
   (setq web-mode-css-indent-offset 2)
@@ -450,7 +516,10 @@
 (use-package company
   :ensure t
   :config
-  (company-mode 1))
+  (company-mode 1)
+  (setq company-tooltip-align-annotations t)
+  (setq company-minimum-prefix-length 1))
+
 (add-hook 'after-init-hook 'global-company-mode)
 (setq company-etags-everywhere '(html-mode web-mode js2-mode))
 (setq company-idle-delay 0.1)
@@ -466,7 +535,6 @@
                            (company-mode +1)))
 (add-hook 'css-mode-hook (lambda ()
                            (electric-operator-mode)))
-
 ;; ;; WORK
 ;; ;;set proxy
 ;; (setq url-proxy-services '(("no_proxy" . "work\\.com")
@@ -506,10 +574,10 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    (quote
-    ("eec08f7474a519de14f12bff9eef27a9c2f89422b00a2a37bd7d94ed4fcccae4" "6b289bab28a7e511f9c54496be647dc60f5bd8f9917c9495978762b99d8c96a0" "75d3dde259ce79660bac8e9e237b55674b910b470f313cdf4b019230d01a982a" "151bde695af0b0e69c3846500f58d9a0ca8cb2d447da68d7fbf4154dcf818ebc" "10461a3c8ca61c52dfbbdedd974319b7f7fd720b091996481c8fb1dded6c6116" "4697a2d4afca3f5ed4fdf5f715e36a6cac5c6154e105f3596b44a4874ae52c45" "6d589ac0e52375d311afaa745205abb6ccb3b21f6ba037104d71111e7e76a3fc" "f0dc4ddca147f3c7b1c7397141b888562a48d9888f1595d69572db73be99a024" "fe666e5ac37c2dfcf80074e88b9252c71a22b6f5d2f566df9a7aa4f9bea55ef8" "d2e9c7e31e574bf38f4b0fb927aaff20c1e5f92f72001102758005e53d77b8c9" "a3fa4abaf08cc169b61dea8f6df1bbe4123ec1d2afeb01c17e11fdc31fc66379" "8aca557e9a17174d8f847fb02870cb2bb67f3b6e808e46c0e54a44e3e18e1020" "7e78a1030293619094ea6ae80a7579a562068087080e01c2b8b503b27900165c" "100e7c5956d7bb3fd0eebff57fde6de8f3b9fafa056a2519f169f85199cc1c96" "93a0885d5f46d2aeac12bf6be1754faa7d5e28b27926b8aa812840fe7d0b7983" default)))
+    ("8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "eec08f7474a519de14f12bff9eef27a9c2f89422b00a2a37bd7d94ed4fcccae4" "6b289bab28a7e511f9c54496be647dc60f5bd8f9917c9495978762b99d8c96a0" "75d3dde259ce79660bac8e9e237b55674b910b470f313cdf4b019230d01a982a" "151bde695af0b0e69c3846500f58d9a0ca8cb2d447da68d7fbf4154dcf818ebc" "10461a3c8ca61c52dfbbdedd974319b7f7fd720b091996481c8fb1dded6c6116" "4697a2d4afca3f5ed4fdf5f715e36a6cac5c6154e105f3596b44a4874ae52c45" "6d589ac0e52375d311afaa745205abb6ccb3b21f6ba037104d71111e7e76a3fc" "f0dc4ddca147f3c7b1c7397141b888562a48d9888f1595d69572db73be99a024" "fe666e5ac37c2dfcf80074e88b9252c71a22b6f5d2f566df9a7aa4f9bea55ef8" "d2e9c7e31e574bf38f4b0fb927aaff20c1e5f92f72001102758005e53d77b8c9" "a3fa4abaf08cc169b61dea8f6df1bbe4123ec1d2afeb01c17e11fdc31fc66379" "8aca557e9a17174d8f847fb02870cb2bb67f3b6e808e46c0e54a44e3e18e1020" "7e78a1030293619094ea6ae80a7579a562068087080e01c2b8b503b27900165c" "100e7c5956d7bb3fd0eebff57fde6de8f3b9fafa056a2519f169f85199cc1c96" "93a0885d5f46d2aeac12bf6be1754faa7d5e28b27926b8aa812840fe7d0b7983" default)))
  '(package-selected-packages
    (quote
-    (flycheck-rust rust-mode toml neotree helm-ag helm-rg xterm-color evil-matchit anzu ag pt ripgrep company-lsp lsp-ui lsp-mode dumb-jump vimrc-mode evil-vimish-fold evil-commentary flycheck-pos-tip electric-operator origami hungry-delete simple counsel-gtags tide doom-themes company-tern editorconfig spaceline-all-the-icons all-the-icons-dired all-the-icons-gnus all-the-icons-ivy doom-modeline markdown-mode evil-visualstar helm-projectile web-mode web-beautify tern helm-gtags ggtags evil-org proxy-mode counsel-projectile magit evil-magit org-bullets ox-pandoc company general which-key linum-relative helm gruvbox-theme evil-escape use-package-ensure-system-package evil))))
+    (expand-region racer ox-clip ox-beamer ox-md solarized-theme org-reveal rainbow-delimiters lsp-ui cargo exec-path-from-shell google-this flycheck-rust rust-mode toml neotree helm-ag helm-rg xterm-color evil-matchit anzu ag pt ripgrep company-lsp lsp-mode dumb-jump vimrc-mode evil-vimish-fold evil-commentary flycheck-pos-tip electric-operator origami hungry-delete simple counsel-gtags tide doom-themes company-tern editorconfig spaceline-all-the-icons all-the-icons-dired all-the-icons-gnus all-the-icons-ivy doom-modeline markdown-mode evil-visualstar helm-projectile web-mode web-beautify tern helm-gtags ggtags evil-org proxy-mode counsel-projectile magit evil-magit org-bullets ox-pandoc company general which-key linum-relative helm gruvbox-theme evil-escape use-package-ensure-system-package evil))))
 
 
 (custom-set-faces
