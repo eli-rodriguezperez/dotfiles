@@ -35,9 +35,11 @@ Plugin 'ncm2/ncm2-racer'
 Plugin 'ncm2/ncm2-pyclang'
 Plugin 'roxma/nvim-yarp'
 Plugin 'ncm2/ncm2-bufword'
+Plugin 'ncm2/ncm2-tern',  {'do': 'npm install'}
 Plugin 'ncm2/ncm2-tmux'
 Plugin 'ncm2/ncm2-path'
 call vundle#end()
+
 filetype indent plugin on
 syntax on
 set cursorline
