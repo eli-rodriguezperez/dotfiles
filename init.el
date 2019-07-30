@@ -10,9 +10,6 @@
                          ("gnu"   . "http://elpa.gnu.org/packages/")
                          ("melpa" . "http://melpa.org/packages/")))
 (package-initialize)
-(when (memq window-system '(mac ns x))
-  (exec-path-from-shell-initialize))
-
 ;; Bootstrap `use-package`
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
@@ -31,7 +28,7 @@
 (menu-bar-mode   -1)
 (global-auto-revert-mode)
 ;; Change default font
-(add-to-list 'default-frame-alist '(font . "Roboto Mono 12"))
+(add-to-list 'default-frame-alist '(font . "Roboto Mono 11"))
 (add-to-list 'default-frame-alist '(height . 24))
 (add-to-list 'default-frame-alist '(width . 80))
 
@@ -125,6 +122,11 @@
   :ensure t
   :config
   (evil-commentary-mode))
+(use-package evil-numbers
+  :ensure t
+  :config
+  (define-key evil-normal-state-map (kbd "C-c a") 'evil-numbers/inc-at-pt)
+  (define-key evil-normal-state-map (kbd "C-c x") 'evil-numbers/dec-at-pt))
 
 ;; When using daemon load things correctly
 (defun init-my-config (&optional _frame)
@@ -155,18 +157,21 @@
 (use-package exec-path-from-shell
   :ensure t)
 ;; Theme
-(load-theme 'solarized-dark t)
 
 (use-package doom-themes
   :ensure t)
 
 (use-package solarized-theme
-  :ensure t)
-
-;; Doom modeline, requires fonts which need admin rights to install
-(use-package doom-modeline
   :ensure t
-  :hook (after-init . doom-modeline-mode))
+  :config
+  (load-theme 'solarized-dark t))
+
+(use-package powerline
+  :ensure t)
+(use-package powerline-evil
+  :ensure t
+  :config
+  (powerline-evil-vim-color-theme))
 
 ;; All the icons for doom-modeline
 (use-package all-the-icons
@@ -328,7 +333,7 @@
            "ox"  '(org-export-dispatch :which-key "export org file")
            ;; Files
            "f"   '(:which-key "File")
-           "ff"  '(counsel-find-file :which-key "find files")
+           "ff"  '(helm-find-files :which-key "find files")
            "f."  '(find-file-at-point :which-key "find file at point")
            "ft"  '(neotree-toggle :which-key "toggle neotree")
            ;; Buffers
@@ -363,7 +368,7 @@
            "p$"  '(shell-command :which-key "shell command")
            ;; Search
            "s"   '(:which-key "Search")
-           "sg"  '(counsel-projectile-git-grep :which-key "grep project")
+           "sg"  '(helm-projectile-rg :which-key "grep project")
            ;; Version Control
            "v"   '(:which-key "Version Control")
            "vm"  '(magit :which-key "launch magit")
@@ -411,14 +416,20 @@
 (use-package lsp-mode
   :ensure t
   :commands lsp
-  :config)
-
-(use-package lsp-ui
-  :ensure t)
+  :init
+  (lsp)
+  :config
+  (require 'lsp-clients))
 
 (use-package company-lsp
   :ensure t
-  :commands company-lsp)
+  :commands company-lsp
+  :config
+  (push 'company-lsp company-backends))
+
+;; Snippet support
+(use-package yasnippet
+  :ensure t)
 
 ;; Org mode packages and settings
 (setq org-src-fontify-natively t)
@@ -483,16 +494,36 @@
   :after flycheck
   :commands flycheck-rust-setup)
 
+;; c/c++
+(use-package ccls
+  :ensure t
+  :hook ((c-mode c++-mode objc-mode) .
+         (lambda () (require 'ccls) (lsp))))
+
 ;; javascript
 (use-package js2-mode
   :ensure t
-  :mode "\\.js\\'\\|\\.json\\'"
+  :mode "\\.js\\'"
   :interpreter "node"
   :config
-  (setq-default js2-basic-offset 2)
-  (require 'lsp-clients))
+  (setq-default js2-basic-offset 2))
+
+(use-package js2-refactor
+  :ensure t)
+
+(use-package typescript-mode
+  :ensure t)
+(use-package tide
+  :ensure t
+  :after (js2-mode company flycheck)
+  :hook ((js2-mode . tide-setup)
+         (js2-mode . tide-hl-identifier-mode)
+         (before-save . tide-format-before-save))
+  :config
+  (setq tide-tsserver-executable "/usr/bin/tsserver"))
 
 (use-package json-mode
+  :ensure t
   :mode "\\.json\\'")
 
 (use-package web-mode
@@ -524,48 +555,13 @@
 (setq company-etags-everywhere '(html-mode web-mode js2-mode))
 (setq company-idle-delay 0.1)
 
-(use-package company-tern
-  :ensure t)
-
-(add-to-list 'company-backends 'company-tern)
-
 (add-hook 'js2-mode-hook (lambda ()
-                           (tern-mode)
+                           (lsp)
                            (electric-operator-mode)
                            (company-mode +1)))
 (add-hook 'css-mode-hook (lambda ()
                            (electric-operator-mode)))
-;; ;; WORK
-;; ;;set proxy
-;; (setq url-proxy-services '(("no_proxy" . "work\\.com")
-;;                            ("http" . "127.0.0.1:8081")
-;;                            ("https" . "127.0.0.1:8081")))
-;; ;;
 
-;; ;;; WINDOWS
-;; (setq explicit-shell-file-name "C:\\msys64\\usr\\bin\\bash.exe")
-;; (setq shell-file-name "bash")
-;; (setq explicit-bash.exe-args '("--noediting" "--login" "-i"))
-;; (setenv "SHELL" shell-file-name)
-;; (add-hook 'comint-output-filter-functions 'comint-strip-ctrl-m)
-;; ;;GTAGSROOT
-;; (setq GTAGSROOT "C:\\GTAGS")
-;; ;; Set external tools for windows indexing
-;; (setq projectile-indexing-method (quote turbo-alien))
-;; ;; Powerline
-;; (use-package powerline
-;;   :ensure t
-;;   :config
-;;   (setq powerline-default-separator "wave")
-;;   )
-
-;; (use-package powerline-evil
-;;   :ensure t
-;;   :config
-;;   :init
-;;   (powerline-evil-center-color-theme)
-;;   )
-;; ;;;
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -574,10 +570,10 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    (quote
-    ("8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "eec08f7474a519de14f12bff9eef27a9c2f89422b00a2a37bd7d94ed4fcccae4" "6b289bab28a7e511f9c54496be647dc60f5bd8f9917c9495978762b99d8c96a0" "75d3dde259ce79660bac8e9e237b55674b910b470f313cdf4b019230d01a982a" "151bde695af0b0e69c3846500f58d9a0ca8cb2d447da68d7fbf4154dcf818ebc" "10461a3c8ca61c52dfbbdedd974319b7f7fd720b091996481c8fb1dded6c6116" "4697a2d4afca3f5ed4fdf5f715e36a6cac5c6154e105f3596b44a4874ae52c45" "6d589ac0e52375d311afaa745205abb6ccb3b21f6ba037104d71111e7e76a3fc" "f0dc4ddca147f3c7b1c7397141b888562a48d9888f1595d69572db73be99a024" "fe666e5ac37c2dfcf80074e88b9252c71a22b6f5d2f566df9a7aa4f9bea55ef8" "d2e9c7e31e574bf38f4b0fb927aaff20c1e5f92f72001102758005e53d77b8c9" "a3fa4abaf08cc169b61dea8f6df1bbe4123ec1d2afeb01c17e11fdc31fc66379" "8aca557e9a17174d8f847fb02870cb2bb67f3b6e808e46c0e54a44e3e18e1020" "7e78a1030293619094ea6ae80a7579a562068087080e01c2b8b503b27900165c" "100e7c5956d7bb3fd0eebff57fde6de8f3b9fafa056a2519f169f85199cc1c96" "93a0885d5f46d2aeac12bf6be1754faa7d5e28b27926b8aa812840fe7d0b7983" default)))
+    ("0598c6a29e13e7112cfbc2f523e31927ab7dce56ebb2016b567e1eff6dc1fd4f" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "eec08f7474a519de14f12bff9eef27a9c2f89422b00a2a37bd7d94ed4fcccae4" "6b289bab28a7e511f9c54496be647dc60f5bd8f9917c9495978762b99d8c96a0" "75d3dde259ce79660bac8e9e237b55674b910b470f313cdf4b019230d01a982a" "151bde695af0b0e69c3846500f58d9a0ca8cb2d447da68d7fbf4154dcf818ebc" "10461a3c8ca61c52dfbbdedd974319b7f7fd720b091996481c8fb1dded6c6116" "4697a2d4afca3f5ed4fdf5f715e36a6cac5c6154e105f3596b44a4874ae52c45" "6d589ac0e52375d311afaa745205abb6ccb3b21f6ba037104d71111e7e76a3fc" "f0dc4ddca147f3c7b1c7397141b888562a48d9888f1595d69572db73be99a024" "fe666e5ac37c2dfcf80074e88b9252c71a22b6f5d2f566df9a7aa4f9bea55ef8" "d2e9c7e31e574bf38f4b0fb927aaff20c1e5f92f72001102758005e53d77b8c9" "a3fa4abaf08cc169b61dea8f6df1bbe4123ec1d2afeb01c17e11fdc31fc66379" "8aca557e9a17174d8f847fb02870cb2bb67f3b6e808e46c0e54a44e3e18e1020" "7e78a1030293619094ea6ae80a7579a562068087080e01c2b8b503b27900165c" "100e7c5956d7bb3fd0eebff57fde6de8f3b9fafa056a2519f169f85199cc1c96" "93a0885d5f46d2aeac12bf6be1754faa7d5e28b27926b8aa812840fe7d0b7983" default)))
  '(package-selected-packages
    (quote
-    (expand-region racer ox-clip ox-beamer ox-md solarized-theme org-reveal rainbow-delimiters lsp-ui cargo exec-path-from-shell google-this flycheck-rust rust-mode toml neotree helm-ag helm-rg xterm-color evil-matchit anzu ag pt ripgrep company-lsp lsp-mode dumb-jump vimrc-mode evil-vimish-fold evil-commentary flycheck-pos-tip electric-operator origami hungry-delete simple counsel-gtags tide doom-themes company-tern editorconfig spaceline-all-the-icons all-the-icons-dired all-the-icons-gnus all-the-icons-ivy doom-modeline markdown-mode evil-visualstar helm-projectile web-mode web-beautify tern helm-gtags ggtags evil-org proxy-mode counsel-projectile magit evil-magit org-bullets ox-pandoc company general which-key linum-relative helm gruvbox-theme evil-escape use-package-ensure-system-package evil))))
+    (rjsx-mode lsp-javascript-typescript typescript-mode evil-numbers json-mode yasnippet powerline-evil powerline expand-region racer ox-clip ox-beamer ox-md solarized-theme org-reveal rainbow-delimiters cargo exec-path-from-shell google-this flycheck-rust rust-mode toml neotree helm-ag helm-rg xterm-color evil-matchit anzu ag pt ripgrep company-lsp lsp-mode dumb-jump vimrc-mode evil-vimish-fold evil-commentary flycheck-pos-tip electric-operator origami hungry-delete simple counsel-gtags tide doom-themes company-tern editorconfig spaceline-all-the-icons all-the-icons-dired all-the-icons-gnus all-the-icons-ivy doom-modeline markdown-mode evil-visualstar helm-projectile web-mode web-beautify tern helm-gtags ggtags evil-org proxy-mode counsel-projectile magit evil-magit org-bullets ox-pandoc company general which-key linum-relative helm gruvbox-theme evil-escape use-package-ensure-system-package evil))))
 
 
 (custom-set-faces
