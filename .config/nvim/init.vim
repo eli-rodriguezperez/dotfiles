@@ -1,49 +1,43 @@
 set nocompatible
 filetype off
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin('~/.vim/plugged')
-Plugin 'VundleVim/Vundle.vim'
-Plugin 'docunext/closetag.vim'
-Plugin 'tpope/vim-commentary'
-Plugin 'tpope/vim-eunuch'
-Plugin 'tpope/vim-surround'
-Plugin 'tpope/vim-fugitive'
-Plugin 'sbdchd/neoformat'
+call plug#begin('~/.vim/plugged')
+Plug 'alvan/vim-closetag'
+Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-eunuch'
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-fugitive'
+Plug 'sbdchd/neoformat'
 
 " Themes
-Plugin 'itchyny/lightline.vim'
-Plugin 'altercation/vim-colors-solarized'
-Plugin 'machakann/vim-highlightedyank'
+Plug 'itchyny/lightline.vim'
+Plug 'altercation/vim-colors-solarized'
+Plug 'machakann/vim-highlightedyank'
 
 " Utilities
-Plugin 'airblade/vim-rooter'
-Plugin 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-Plugin 'junegunn/fzf.vim'
-Plugin 'godlygeek/tabular'
+Plug 'airblade/vim-rooter'
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'junegunn/fzf.vim'
+Plug 'godlygeek/tabular'
 
 " Language syntactic support
-Plugin 'w0rp/ale'
-Plugin 'sheerun/vim-polyglot'
-Plugin 'jceb/vim-orgmode'
-Plugin 'editorconfig/editorconfig-vim'
-Plugin 'pangloss/vim-javascript'
-Plugin 'rust-lang/rust.vim'
+Plug 'w0rp/ale'
+Plug 'sheerun/vim-polyglot'
+Plug 'jceb/vim-orgmode'
+Plug 'editorconfig/editorconfig-vim'
+Plug 'pangloss/vim-javascript'
+Plug 'jonsmithers/vim-html-template-literals'
+Plug 'rust-lang/rust.vim'
 
 " Completion support
-Plugin 'ncm2/ncm2'
-Plugin 'ncm2/ncm2-racer'
-Plugin 'ncm2/ncm2-pyclang'
-Plugin 'roxma/nvim-yarp'
-Plugin 'ncm2/ncm2-bufword'
-Plugin 'ncm2/ncm2-tern',  {'do': 'npm install'}
-Plugin 'ncm2/ncm2-tmux'
-Plugin 'ncm2/ncm2-path'
-call vundle#end()
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'roxma/nvim-yarp'
+call plug#end()
 
 filetype indent plugin on
 syntax on
 set cursorline
 set nobackup
+set nowritebackup
 set noswapfile
 set hidden
 set wildmenu
@@ -79,10 +73,10 @@ set cinoptions+=j1
 set t_Co=256
 colorscheme solarized
 set background=dark
-"Disable vim theme background
-hi Normal ctermbg=none
-"Set 'Visual mode' selection background color
-hi Visual ctermbg=darkgrey
+" Recommended for coc
+set updatetime=300
+set shortmess+=c
+set signcolumn=yes
 
 " Permanent undo
 set undodir=~/.vimdid
@@ -103,10 +97,7 @@ augroup numbertoggle
   autocmd BufLeave,FocusLost,InsertEnter   * set norelativenumber
 augroup END
 
-" enable ncm2 for all buffers
-autocmd BufEnter * call ncm2#enable_for_buffer()
 
-" IMPORTANT: :help Ncm2PopupOpen for more information
 set completeopt=noinsert,menuone,noselect
 
 " Use <TAB> to select the popup menu:
@@ -127,8 +118,8 @@ nmap <leader><tab> :b# <CR>
 nmap <leader>bb :Buffers <CR>
 nmap <leader>bs :w<CR>
 nmap <leader>wd :close <CR>
-nmap <leader>wv :vsplit <CR>
-nmap <leader>wh :split <CR>
+nmap <leader>w- :vsplit <CR>
+nmap <leader>w/ :split <CR>
 nmap <leader>wt :tab sp <CR>
 nmap <leader>wc :tabclose <CR>
 nmap <leader>pf :Files <CR>
@@ -180,7 +171,17 @@ let g:ale_rust_rls_config = {
 	\ }
 	\ }
 let g:ale_rust_rls_toolchain = ''
-let g:ale_linters = {'rust': ['rls']}
-let b:ale_fixers = {'javascript': ['prettier', 'eslint']}
+let g:ale_linters = {'rust': ['rls'], 'javascript': ['eslint']}
+let g:ale_fixers = {'javascript': ['prettier', 'eslint']}
+let g:ale_fix_on_save = 1
 
 let g:clang_exec='/usr/bin/clang'
+
+"Closetag for lit-html buffers
+let g:closetag_filetypes = 'html,xhtml,phtml,javascript,typescript'
+let g:closetag_regions = {
+      \ 'typescript.tsx': 'jsxRegion,tsxRegion,litHtmlRegion',
+      \ 'javascript.jsx': 'jsxRegion,litHtmlRegion',
+      \ 'javascript':     'litHtmlRegion',
+      \ 'typescript':     'litHtmlRegion',
+      \ }
