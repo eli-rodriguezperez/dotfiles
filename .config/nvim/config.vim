@@ -13,8 +13,12 @@ Plug 'jiangmiao/auto-pairs'
 " Themes
 Plug 'itchyny/lightline.vim'
 Plug 'chriskempson/base16-vim'
+Plug 'sainnhe/gruvbox-material'
+Plug 'sainnhe/everforest'
+Plug 'shaunsingh/solarized.nvim'
 Plug 'morhetz/gruvbox'
 Plug 'altercation/vim-colors-solarized'
+Plug 'dracula/vim', { 'as': 'dracula' }
 Plug 'machakann/vim-highlightedyank'
 
 " Utilities
@@ -26,12 +30,13 @@ Plug 'norcalli/nvim-colorizer.lua'
 
 " Language syntactic support
 Plug 'cakebaker/scss-syntax.vim'
-Plug 'sheerun/vim-polyglot'
 Plug 'jceb/vim-orgmode'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'pangloss/vim-javascript'
 Plug 'jonsmithers/vim-html-template-literals'
 Plug 'rust-lang/rust.vim'
+Plug 'Quramy/vim-js-pretty-template'
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 
 " Completion support
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
@@ -113,11 +118,15 @@ endfunction
 set completeopt=noinsert,menuone,noselect
 
 " Use <TAB> to select the popup menu:
-inoremap <expr><C-l> (pumvisible()?(empty(v:completed_item)?"\<C-n>\<C-y>":"\<C-y>"):coc#refresh())
-inoremap <expr><CR> (pumvisible()?(empty(v:completed_item)?"\<CR>\<CR>":"\<C-y>"):"\<CR>")
+inoremap <silent><expr> <C-l>
+    \ (coc#pum#visible() ?
+    \ (empty(v:completed_item)?((coc#pum#next(1))(coc#_select_confirm())):coc#_select_confirm()):
+    \ coc#refresh())
+" inoremap <expr><C-l> (pumvisible()?(empty(v:completed_item)?"\<C-n>\<C-y>":"\<C-y>"):coc#refresh())
+" inoremap <expr><CR> (pumvisible()?(empty(v:completed_item)?"\<CR>\<CR>":"\<C-y>"):"\<CR>")
 
-inoremap <expr> <C-j> pumvisible() ? "\<C-n>" : "\<C-j>"
-inoremap <expr> <C-k> pumvisible() ? "\<C-p>" : "\<C-k>"
+inoremap <expr> <C-j> coc#pum#visible() ? coc#pum#next(1) : "\<C-j>"
+inoremap <expr> <C-k> coc#pum#visible() ? coc#pum#prev(1) : "\<C-k>"
 "
 " Search results centered please
 nnoremap <silent> n nzz
@@ -141,7 +150,8 @@ tnoremap <C-g> <Esc>
 let mapleader= " "
 nnoremap <expr> k (v:count == 0 ? 'gk' : 'k')
 nnoremap <expr> j (v:count == 0 ? 'gj' : 'j')
-nmap <leader>dv :e ~/.config/nvim/init.vim <CR>
+nmap <leader>dv :e ~/.config/nvim/config.vim <CR>
+nmap <leader>dl :e ~/.config/nvim/init.lua <CR>
 nmap <leader>de :e ~/.emacs.d/init.el <CR>
 nmap <leader>bd :bd <CR>
 nmap <leader><tab> :b# <CR>
@@ -154,7 +164,9 @@ nmap <leader>wt :tab sp <CR>
 nmap <leader>wc :tabclose <CR>
 nmap <leader>pf :Files <CR>
 nmap <leader>pg :GFiles <CR>
+nmap <leader>ph :History <CR>
 nmap <leader>ff :find
+nmap <leader>fl :BLines <CR>
 nmap <leader>vd :windo diffthis <CR>
 nmap <leader>vo :diffoff! <CR>
 nmap <leader>sg :Rg <CR>
@@ -172,7 +184,40 @@ set path+=**
 
 let base16colorspace=256  " Access colors present in 256 colorspace
 
-let g:lightline = { 'colorscheme': 'jellybeans', }
+let g:lightline = {
+    \ 'colorscheme': 'jellybeans',
+    \ 'active': {
+        \   'left': [ [ 'mode', 'paste' ],
+        \             [ 'gitbranch', 'readonly', 'filename', 'modified' ] ]
+    \ },
+        \ 'component_function': {
+            \   'gitbranch': 'FugitiveHead',
+            \   'filename': 'LightlineFilename'
+        \ },
+\ }
+
+function! s:trim(maxlen, str) abort
+    let trimed = len(a:str) > a:maxlen ? a:str[0:a:maxlen] . '..' : a:str
+    return trimed
+endfunction
+
+function! LightlineFilename() abort
+    let l:prefix = expand('%:p') =~? "fugitive://" ? '(fugitive) ' : ''
+    let l:maxlen = winwidth(0) - winwidth(0) / 2
+    let l:relative = expand('%:.')
+    let l:tail = expand('%:t')
+    let l:noname = 'No Name'
+
+    if winwidth(0) < 50
+        return ''
+    endif
+
+    if winwidth(0) < 86
+        return l:tail ==# '' ? l:noname : l:prefix . s:trim(l:maxlen, l:tail)
+    endif
+
+    return l:relative ==# '' ? l:noname : l:prefix . s:trim(l:maxlen, l:relative)
+endfunction
 
 if executable('rg')
   set grepprg=rg\ --no-heading\ --vimgrep
@@ -187,7 +232,7 @@ command! -bang -nargs=* Rg
   \           : fzf#vim#with_preview('right:50%:hidden', '?'),
   \   <bang>0)
 
-nmap <silent> E <Plug>(coc-diagnostic-prev)
+nmap <silent> I <Plug>(coc-codeaction-line)
 nmap <silent> W <Plug>(coc-diagnostic-next)
 nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
@@ -195,6 +240,10 @@ nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
 " Use K to show documentation in preview window
 nnoremap <silent> K :call <SID>show_documentation()<CR>
+
+" Fix completion menu colors
+autocmd VimEnter,ColorScheme * hi! link CocMenuSel PMenuSel
+autocmd VimEnter,ColorScheme * hi! link CocSearch Identifier
 
 function! s:show_documentation()
   if (index(['vim','help'], &filetype) >= 0)
@@ -231,7 +280,7 @@ command! -nargs=? Fold :call     CocAction('fold', <f-args>)
 command! -nargs=0 OR   :call     CocAction('runCommand', 'editor.action.organizeImport')
 
 " Add status line support, for integration with other plugin, checkout `:h coc-status`
-set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
+set statusline^=%{coc#status()}%{get(b:,'coc#_current_function','')}
 
 let g:clang_exec='/usr/bin/clang'
 
@@ -251,7 +300,7 @@ let g:EditorConfig_exclude_patterns = ['fugitive://.\*', 'scp://.\*']
 let g:html_indent_style1 = "inc"
 
 set termguicolors
-colorscheme base16-gruvbox-dark-hard
+let g:gruvbox_italic = 1
+colorscheme gruvbox
 set background=dark
 hi Normal ctermbg=NONE
-let g:gruvbox_italic = 1
