@@ -11,7 +11,8 @@ Plug 'sbdchd/neoformat'
 Plug 'jiangmiao/auto-pairs'
 
 " Themes
-Plug 'itchyny/lightline.vim'
+Plug 'nvim-lualine/lualine.nvim'
+Plug 'kyazdani42/nvim-web-devicons'
 Plug 'chriskempson/base16-vim'
 Plug 'sainnhe/gruvbox-material'
 Plug 'sainnhe/everforest'
@@ -69,11 +70,11 @@ set ttyfast
 set lazyredraw
 set synmaxcol=500
 set mouse=a
-set cmdheight=2
+set cmdheight=1
 set notimeout ttimeout ttimeoutlen=0 timeoutlen=200
-set tabstop=8
-set softtabstop=4
-set shiftwidth=4
+set tabstop=4
+set softtabstop=2
+set shiftwidth=2
 set expandtab
 set autoindent
 set inccommand=nosplit
@@ -118,10 +119,7 @@ endfunction
 set completeopt=noinsert,menuone,noselect
 
 " Use <TAB> to select the popup menu:
-inoremap <silent><expr> <C-l>
-    \ (coc#pum#visible() ?
-    \ (empty(v:completed_item)?((coc#pum#next(1))(coc#_select_confirm())):coc#_select_confirm()):
-    \ coc#refresh())
+inoremap <expr> <C-l> coc#pum#visible() ? coc#_select_confirm() : coc#refresh()
 " inoremap <expr><C-l> (pumvisible()?(empty(v:completed_item)?"\<C-n>\<C-y>":"\<C-y>"):coc#refresh())
 " inoremap <expr><CR> (pumvisible()?(empty(v:completed_item)?"\<CR>\<CR>":"\<C-y>"):"\<CR>")
 
@@ -184,41 +182,6 @@ set path+=**
 
 let base16colorspace=256  " Access colors present in 256 colorspace
 
-let g:lightline = {
-    \ 'colorscheme': 'jellybeans',
-    \ 'active': {
-        \   'left': [ [ 'mode', 'paste' ],
-        \             [ 'gitbranch', 'readonly', 'filename', 'modified' ] ]
-    \ },
-        \ 'component_function': {
-            \   'gitbranch': 'FugitiveHead',
-            \   'filename': 'LightlineFilename'
-        \ },
-\ }
-
-function! s:trim(maxlen, str) abort
-    let trimed = len(a:str) > a:maxlen ? a:str[0:a:maxlen] . '..' : a:str
-    return trimed
-endfunction
-
-function! LightlineFilename() abort
-    let l:prefix = expand('%:p') =~? "fugitive://" ? '(fugitive) ' : ''
-    let l:maxlen = winwidth(0) - winwidth(0) / 2
-    let l:relative = expand('%:.')
-    let l:tail = expand('%:t')
-    let l:noname = 'No Name'
-
-    if winwidth(0) < 50
-        return ''
-    endif
-
-    if winwidth(0) < 86
-        return l:tail ==# '' ? l:noname : l:prefix . s:trim(l:maxlen, l:tail)
-    endif
-
-    return l:relative ==# '' ? l:noname : l:prefix . s:trim(l:maxlen, l:relative)
-endfunction
-
 if executable('rg')
   set grepprg=rg\ --no-heading\ --vimgrep
   set grepformat=%f:%l:%c:%m
@@ -238,6 +201,8 @@ nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
+" Remap for rename current word
+nmap <leader>rn <Plug>(coc-rename)
 " Use K to show documentation in preview window
 nnoremap <silent> K :call <SID>show_documentation()<CR>
 
@@ -253,8 +218,6 @@ function! s:show_documentation()
   endif
 endfunction
 
-" Remap for rename current word
-nmap <leader>rn <Plug>(coc-rename)
 
 augroup mygroup
   autocmd!
@@ -300,7 +263,11 @@ let g:EditorConfig_exclude_patterns = ['fugitive://.\*', 'scp://.\*']
 let g:html_indent_style1 = "inc"
 
 set termguicolors
-let g:gruvbox_italic = 1
-colorscheme gruvbox
+let g:gruvbox_material_enable_bold = 1
+let g:gruvbox_material_enable_italic = 1
+let g:gruvbox_material_diagnostic_text_highlight = 1
+let g:gruvbox_material_current_word = 'bold'
+colorscheme gruvbox-material
 set background=dark
 hi Normal ctermbg=NONE
+
